@@ -3,7 +3,7 @@
 	"package": "com.mendmend.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"ExampleMixin"
+		"anvil.AnvilScreenHandlerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
