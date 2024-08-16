@@ -11,10 +11,16 @@
 	"icon": "assets/mending-mending/icon.png",
 	"environment": "*",
 	"entrypoints": {
+		"client": [
+			"com.mendmend.client.MendingMendingClient"
+		],
 		"main": [
 			"com.mendmend.MendingMending"
 		]
 	},
+	"mixins": [
+		"mending-mending.mixins.json"
+	],
 	"depends": {
 		"fabricloader": ">=0.15.11",
 		"minecraft": "~1.21.1",
