@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
+import net.fabricmc.fabric.api.gamerule.v1.rule.DoubleRule;
 import net.fabricmc.fabric.api.gamerule.v1.rule.EnumRule;
 import net.minecraft.world.GameRules;
 import org.slf4j.Logger;
@@ -39,6 +40,10 @@ public class MendingMending implements ModInitializer {
 
 	//endregion
 
+	//region Mending Scaling
+	public static final GameRules.Key<DoubleRule> MENDING_REPAIR_FACTOR =
+			GameRuleRegistry.register("mendingRepairFactor", GameRules.Category.MISC, GameRuleFactory.createDoubleRule(1.0));
+	//endregion
 
 	@Override
 	public void onInitialize() { }

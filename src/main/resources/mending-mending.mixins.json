@@ -3,7 +3,8 @@
 	"package": "com.mendmend.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"anvil.AnvilScreenHandlerMixin"
+		"anvil.AnvilScreenHandlerMixin",
+		"xp.ExperienceOrbEntityMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
