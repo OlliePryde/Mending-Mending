@@ -1,6 +1,8 @@
 package com.mendmend.mixin.anvil;
 
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -21,8 +23,22 @@ import static com.mendmend.MendingMending.*;
 
 @Mixin(AnvilScreenHandler.class)
 public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
+
     public AnvilScreenHandlerMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
         super(type, syncId, playerInventory, context);
+    }
+
+    @Redirect(method = "updateResult", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Inventory;getStack(I)Lnet/minecraft/item/ItemStack;"))
+    public ItemStack updateResult$getStack(@NotNull Inventory instance, int slot) {
+        ItemStack stack = instance.getStack(slot);
+        GameRules gr = player.getWorld().getGameRules();
+        if (gr.get(REPAIRING_XP_COST_METHOD).get() == RepairXPCostMethod.fixed)
+        {
+            if (stack != ItemStack.EMPTY)
+                stack.set(DataComponentTypes.REPAIR_COST, 0);
+            return stack;
+        }
+        return stack;
     }
 
     @Redirect(method = "updateResult", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;canRepair(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z"))
