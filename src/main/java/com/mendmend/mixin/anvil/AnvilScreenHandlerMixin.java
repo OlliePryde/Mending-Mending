@@ -3,11 +3,13 @@ package com.mendmend.mixin.anvil;
 import net.fabricmc.fabric.api.item.v1.EnchantingContext;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.*;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringHelper;
@@ -18,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Iterator;
 import java.util.Set;
 
 import static com.mendmend.MendingMending.*;
@@ -186,7 +189,19 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
                 continue;
             }
 
-            outputEnchants.add(enchant, modifierEnchants.getLevel(enchant));
+            boolean enchantIsValid = true;
+            for (var existingEnchant : outputEnchants.getEnchantments())
+            {
+                if (!existingEnchant.equals(enchant) && !Enchantment.canBeCombined(enchant, existingEnchant)) {
+                    enchantIsValid = false;
+                    break;
+                }
+            }
+
+            if (enchantIsValid)
+            {
+                outputEnchants.add(enchant, modifierEnchants.getLevel(enchant));
+            }
         }
         var output = outputEnchants.build();
 
