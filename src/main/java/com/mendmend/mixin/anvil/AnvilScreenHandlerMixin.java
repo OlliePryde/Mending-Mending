@@ -33,8 +33,6 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
     @Shadow
     private int repairItemUsage;
 
-    @Shadow public abstract int getLevelCost();
-
     public AnvilScreenHandlerMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
         super(type, syncId, playerInventory, context);
     }
@@ -141,7 +139,7 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
         item.setDamage(maxHealth - newHealth);
         this.repairItemUsage = (int) Math.ceil(repaired / singleRepair);
 
-        return (int) Math.ceil(repaired / 4.0);
+        return this.repairItemUsage;
     }
 
     @Unique
