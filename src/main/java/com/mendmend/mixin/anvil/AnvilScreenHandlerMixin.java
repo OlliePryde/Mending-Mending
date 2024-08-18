@@ -9,7 +9,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.*;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringHelper;
@@ -20,7 +19,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Iterator;
 import java.util.Set;
 
 import static com.mendmend.MendingMending.*;
@@ -178,20 +176,32 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
 
     @Unique
     private int enchantItem(ItemStack item, ItemStack modifier) {
-        var enchants = new ItemEnchantmentsComponent.Builder(item.getEnchantments());
         var isBook = item.isOf(Items.ENCHANTED_BOOK);
         var totalCost = 0;
 
         var modifierEnchants = EnchantmentHelper.getEnchantments(modifier);
-        var outputEnchants = new ItemEnchantmentsComponent.Builder(item.getEnchantments());
+        var outputEnchants = new ItemEnchantmentsComponent.Builder(EnchantmentHelper.getEnchantments(item));
         for (var enchant : modifierEnchants.getEnchantments()) {
             if (!isBook && !item.canBeEnchantedWith(enchant, EnchantingContext.ACCEPTABLE)) {
                 continue;
             }
 
+            int modifierEnchantLevel = modifierEnchants.getLevel(enchant);
+            int appliedEnchantLevel = modifierEnchantLevel;
             boolean enchantIsValid = true;
             for (var existingEnchant : outputEnchants.getEnchantments())
             {
+                if (existingEnchant.equals(enchant)) {
+                    int existingEnchantLevel = outputEnchants.getLevel(existingEnchant);
+                    if (existingEnchantLevel > modifierEnchantLevel) {
+                        appliedEnchantLevel = existingEnchantLevel;
+                    }
+                    else if (existingEnchantLevel == modifierEnchantLevel) {
+                        appliedEnchantLevel = Math.min(existingEnchant.value().getMaxLevel(), existingEnchantLevel + 1);
+                    }
+                    continue;
+                }
+
                 if (!existingEnchant.equals(enchant) && !Enchantment.canBeCombined(enchant, existingEnchant)) {
                     enchantIsValid = false;
                     break;
@@ -200,22 +210,17 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
 
             if (enchantIsValid)
             {
-                outputEnchants.add(enchant, modifierEnchants.getLevel(enchant));
+                outputEnchants.add(enchant, appliedEnchantLevel);
             }
         }
         var output = outputEnchants.build();
 
         // Combine all the enchants and get the costs here to make it identical no matter the order
         for (var enchant : output.getEnchantments()) {
-            if (!isBook && !item.canBeEnchantedWith(enchant, EnchantingContext.ACCEPTABLE)) {
-                continue;
-            }
-
-            enchants.add(enchant, modifierEnchants.getLevel(enchant));
             totalCost += enchant.value().getAnvilCost();
         }
 
-        EnchantmentHelper.set(item, enchants.build());
+        EnchantmentHelper.set(item, output);
         return totalCost;
     }
 
